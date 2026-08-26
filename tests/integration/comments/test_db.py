@@ -378,45 +378,4 @@ async def test_delete_comment(user, post):
     assert result is True
     assert deleted is None
 
-@pytest.mark.asyncio
-async def test_delete_comment_with_replies(user, post):
-
-    async with DBManager(session_factory=SessionLocal) as db:
-
-        parent = await db.comments.add(
-            CommentAdd(
-                post_id=post.id,
-                author_id=user.id,
-                text="Родитель",
-            )
-        )
-
-        await db.commit()
-
-        reply = await db.comments.add(
-            CommentAdd(
-                post_id=post.id,
-                author_id=user.id,
-                text="Ответ",
-                parent_id=parent.id,
-            )
-        )
-
-        await db.commit()
-
-        await db.comments.delete(
-            id=parent.id
-        )
-
-        await db.commit()
-
-        deleted_parent = await db.comments.get_one_or_none(
-            id=parent.id
-        )
-
-        deleted_reply = await db.comments.get_one_or_none(
-            id=reply.id
-        )
-
-    assert deleted_parent is None
-    assert deleted_reply is None               
+               

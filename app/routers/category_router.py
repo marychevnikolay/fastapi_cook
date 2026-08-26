@@ -28,15 +28,15 @@ async def create_category(
     category_data: CategoryAdd = Body(
         openapi_examples={
             "1": {
-                "summary": "Сочи",
+                "summary": "Первое блюдо",
                 "value": {
-                    "title": "Отель Сочи 5 звезд у моря",
+                    "title": "Первым блюдам относятся",
                 },
             },
             "2": {
-                "summary": "Дубай",
+                "summary": "Кондитерские изделия",
                 "value": {
-                    "title": "Отель Дубай У фонтана",
+                    "title": "Кондитерским изделиям относятся ",
                 },
             },
         }
@@ -59,8 +59,8 @@ async def edit_category(
 
 @router.patch(
     "/{category_id}",
-    summary="Частичное обновление данных об отеле",
-    description="<h1>Тут мы частично обновляем данные об отеле: можно отправить name, а можно title</h1>",
+    summary="Частичное обновление данных об категории",
+    description="<h1>Тут мы частично обновляем данные об категории: можно отправить name, а можно title</h1>",
 )
 async def partially_edit_category(
     category_id: int,

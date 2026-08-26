@@ -11,7 +11,7 @@ class CommentAddRequest(BaseModel):
     text: str = Field(
         ..., min_length=1, max_length=1000, description="Текст комментария"
     )
-    parent_id: str | None = None
+    parent_id: int | None = None
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -36,26 +36,23 @@ class CommentUpdateRequest(BaseModel):
 
 
 class CommentResponse(BaseModel):
-    """Схема для ответа с комментарием"""
-
     id: int
     text: str
     created_at: datetime
     post_id: int
-    _id: int
     parent_id: Optional[int] = None
 
-    # Данные автора
     author: Optional[UserResponse] = None
 
-    # Ответы на комментарий
-    replies: List["CommentResponse"] = []
+    replies: List["CommentResponse"] = Field(
+        default_factory=list
+    )
 
     model_config = ConfigDict(from_attributes=True)
 
 
-# Для рекурсивных типов
 CommentResponse.model_rebuild()
+
 
 
 class CommentShortResponse(BaseModel):
@@ -63,3 +60,13 @@ class CommentShortResponse(BaseModel):
     text: str
 
     model_config = ConfigDict(from_attributes=True)
+
+class CommentReplyResponse(BaseModel):
+    id: int
+    text: str
+    created_at: datetime
+    post_id: int
+    parent_id: Optional[int] = None
+    author: Optional[UserResponse] = None
+
+    model_config = ConfigDict(from_attributes=True)    

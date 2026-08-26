@@ -26,7 +26,7 @@ from app.core.exceptions import (
 from app.models.users import UserOrm
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.security import oauth2_scheme
-from app.main import limiter
+from app.core.limiter import limiter
 router = APIRouter(prefix="/auth", tags=["Пользователи"])
 
 
@@ -36,7 +36,7 @@ router = APIRouter(prefix="/auth", tags=["Пользователи"])
     summary="Регистрация пользователя",
 )
 @limiter.limit("5/minute")
-async def register(data: UserCreate, db: DBDep) -> UserRead:
+async def register(data: UserCreate, db: DBDep, request: Request) -> UserRead:
     service = UserService(db)
     try:
         return await service.register(data.name, data.password)
@@ -77,6 +77,7 @@ def _set_token_cookies(
 @router.post("/login")
 @limiter.limit("5/minute")
 async def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
     # Проверка пользователя

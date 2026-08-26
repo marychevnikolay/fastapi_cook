@@ -71,16 +71,32 @@ class CommentRepository(BaseRepository):
         return result.scalars().all()
 
     async def get_replies(self, parent_id: int) -> List[CommentsOrm]:
-        """Получить ответы на комментарий"""
         query = (
             select(self.model)
             .where(self.model.parent_id == parent_id)
-            .options(selectinload(self.model.author))
+            .options(
+                selectinload(self.model.author),
+                selectinload(self.model.replies).selectinload(
+                    CommentsOrm.author
+                ),
+            )
             .order_by(self.model.created_at)
         )
 
         result = await self.session.execute(query)
+
         return result.scalars().all()
+    # async def get_replies(self, parent_id: int) -> List[CommentsOrm]:
+    #     """Получить ответы на комментарий"""
+    #     query = (
+    #         select(self.model)
+    #         .where(self.model.parent_id == parent_id)
+    #         .options(selectinload(self.model.author))
+    #         .order_by(self.model.created_at)
+    #     )
+
+    #     result = await self.session.execute(query)
+    #     return result.scalars().all()
 
     async def get_all_by_post(
         self, post_id: int, limit: int = 100, offset: int = 0

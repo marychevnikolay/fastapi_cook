@@ -18,20 +18,23 @@ class DBManager:
 
     async def __aenter__(self) -> "DBManager":
         self.session = self.session_factory()
+
         self.users = UserRepository(self.session)
         self.auth = AuthRepository(self.session)
 
         self.categories = CategoryRepository(self.session)
         self.posts = PostsRepository(self.session)
         self.comments = CommentRepository(self.session)
+        
         return self
 
+    
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-
-        if exc_type:
-            await self.session.rollback()
-
-        await self.session.close()
+        try:
+            if exc_type:
+                await self.session.rollback()
+        finally:
+            await self.session.close()
 
     async def commit(self) -> None:
         if self.session:

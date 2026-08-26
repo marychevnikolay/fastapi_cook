@@ -13,7 +13,7 @@ class PostAddRequest(BaseModel):
 
 
 class PostAdd(BaseModel):
-    category_id: int | None = None
+    category_id: int 
     author_id: int | None = None
     title: str
     content: str | None = None

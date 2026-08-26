@@ -1,11 +1,12 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.base import BaseRepository
 from app.models.users import RefreshToken, UserOrm, UserSession
+from app.schemas.users import UserUpdate
 
 
 class UserRepository:
@@ -32,6 +33,46 @@ class UserRepository:
 
         return result.scalar_one_or_none()
 
+    async def get_all(self) -> list[UserOrm]:
+        stmt = select(UserOrm)
+
+        result = await self.session.execute(stmt)
+
+        return list(result.scalars().all())
+
+    async def update_user(
+        self,
+        user_id: int,
+        data: UserUpdate,
+    ) -> Optional[UserOrm]:
+
+        stmt = (
+            update(UserOrm)
+            .where(UserOrm.id == user_id)
+            .values(
+                **data.model_dump(exclude_unset=True, exclude_none=True)
+            )
+            .returning(UserOrm)
+        )
+
+        result = await self.session.execute(stmt)
+
+        return result.scalar_one_or_none()
+
+    async def delete_user(self, user_id: int) -> bool:
+        stmt = (
+            delete(UserOrm)
+            .where(UserOrm.id == user_id)
+            .returning(UserOrm.id)
+        )
+
+        result = await self.session.execute(stmt)
+
+        deleted_id = result.scalar_one_or_none()
+
+        return deleted_id is not None
+
+
 
 class AuthRepository:
     def __init__(self, session: AsyncSession):
@@ -46,6 +87,7 @@ class AuthRepository:
         self.session.add(record)
         await self.session.flush()
         return record
+
 
     async def get_session_by_hash(self, token_hash: str) -> Optional[UserSession]:
         return await self.session.scalar(

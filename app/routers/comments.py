@@ -5,6 +5,7 @@ from app.routers.dependencies import DBManager, UserIdDep, PaginationDep, get_db
 from app.schemas.comments import (
     CommentAddRequest,
     CommentAdd,
+    CommentReplyResponse,
     CommentUpdateRequest,
     CommentResponse,
 )
@@ -207,16 +208,21 @@ async def delete_comment(
 
     return None
 
-
-##ПОЛУЧЕНИЕ ОТВЕТОВ НА КОММЕНТАРИЙ
-@router.get("/{comment_id}/replies", response_model=List[CommentResponse])
+@router.get(
+    "/{comment_id}/replies",
+    response_model=List[CommentReplyResponse],
+)
 async def get_comment_replies(
-    post_id: int, comment_id: int, db: DBManager = Depends(get_db)
+    post_id: int,
+    comment_id: int,
+    db: DBManager = Depends(get_db),
 ):
     comment = await db.comments.get_one_or_none(id=comment_id)
+
     if not comment:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Comment not found",
         )
 
     if comment.post_id != post_id:
@@ -225,9 +231,29 @@ async def get_comment_replies(
             detail="Comment does not belong to this post",
         )
 
-        # Получаем ответы
     replies = await db.comments.get_replies(comment_id)
+
     return replies
+##ПОЛУЧЕНИЕ ОТВЕТОВ НА КОММЕНТАРИЙ
+# @router.get("/{comment_id}/replies", response_model=List[CommentResponse])
+# async def get_comment_replies(
+#     post_id: int, comment_id: int, db: DBManager = Depends(get_db)
+# ):
+#     comment = await db.comments.get_one_or_none(id=comment_id)
+#     if not comment:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found"
+#         )
+
+#     if comment.post_id != post_id:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Comment does not belong to this post",
+#         )
+
+#         # Получаем ответы
+#     replies = await db.comments.get_replies(comment_id)
+#     return replies
 
 
 @router.get("/stats/count")

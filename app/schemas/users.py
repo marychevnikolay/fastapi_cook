@@ -22,13 +22,9 @@ class UserResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
-# class UserShortResponse(BaseModel):
-#     id: int
-#     username: str
-
-#     model_config = ConfigDict(from_attributes=True)
-
+class UserUpdate(BaseModel):
+    name: str | None = None
+    password_hash: str | None = None
 
 class LoginRequest(BaseModel):
     name: str

@@ -3,36 +3,18 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 import uvicorn
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-import sys
-from pathlib import Path
-from .init import redis_manager
-
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 
 
-
-from .routers.category_router import router as router_category
-from .routers.posts import router as router_posts
-from .routers.auth import router as router_auth
-from .routers.comments import router as router_coments
-
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # При старте приложения
-    await redis_manager.connect()
-    FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
-    yield
-    await redis_manager.close()
-    # При выключении/перезагрузке приложения
+from app.routers.category_router import router as router_category
+from app.routers.posts import router as router_posts
+from app.routers.auth import router as router_auth
+from app.routers.comments import router as router_coments
+from app.core.limiter import limiter
+from app.core.redis import lifespan
 
 
 app = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc", lifespan=lifespan)
-limiter = Limiter(key_func=get_remote_address)
+
 app.state.limiter = limiter
 app.include_router(router_auth)
 app.include_router(router_category)

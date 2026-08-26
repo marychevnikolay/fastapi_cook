@@ -110,11 +110,12 @@ class PostsRepository(BaseRepository):
     async def edit(
         self,
         data: PostPatch,
+        exclude_unset: bool = False,
         **filters,
     ):
 
         values = data.model_dump(
-            exclude_unset=True,
+            exclude_unset=exclude_unset,
             exclude_none=True,
         )
 

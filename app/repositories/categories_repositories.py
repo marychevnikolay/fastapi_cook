@@ -22,7 +22,7 @@ class CategoryRepository(BaseRepository):
         # Поиск по названию (если передан)
         if search:
             query = query.where(
-                func.lower(self.model.name).contains(search.strip().lower())
+                func.lower(self.model.title).contains(search.strip().lower())
             )
 
         # Пагинация
@@ -51,11 +51,11 @@ class CategoryRepository(BaseRepository):
 
         return self.schema.model_validate(category, from_attributes=True)
 
-    async def get_by_name(self, name: str) -> Optional[Category]:
+    async def get_by_name(self, title: str) -> Optional[Category]:
         """
         Получить категорию по названию
         """
-        return await self.get_one_or_none(name=name)
+        return await self.get_one_or_none(title=title)
 
     async def add(self, data: CategoryAdd) -> Category:
         """
@@ -115,7 +115,7 @@ class CategoryRepository(BaseRepository):
 
         if search:
             query = query.where(
-                func.lower(self.model.name).contains(search.strip().lower())
+                func.lower(self.model.title).contains(search.strip().lower())
             )
 
         result = await self.session.execute(query)
